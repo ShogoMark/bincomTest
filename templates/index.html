@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Election Results</title>
+</head>
+<body>
+    <h1>Select Polling Unit:</h1>
+    <label for="polling_unit_id">Polling Unit ID:</label>
+    <input type="text" id="polling_unit_id" placeholder="Enter Polling Unit ID">
+    <button onclick="getResults()">Get Results</button>
+
+    <div id="results"></div>
+
+    <script>
+        function getResults() {
+            const pollingUnitId = document.getElementById('polling_unit_id').value;
+            fetch(`/api/polling_unit_results?polling_unit_id=${pollingUnitId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = JSON.stringify(data.results, null, 2);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
