@@ -36,7 +36,11 @@ def get_polling_unit_results():
     # Query the database for election results of the specified polling unit
     conn = get_db()
     cursor = conn.cursor(dictionary=True)  # Return results as dictionaries
-    cursor.execute("SELECT * FROM polling_unit WHERE polling_unit_id = %s", (polling_unit_id,))
+    cursor.execute("SELECT  apr.party_abbreviation, apr.party_score "
+                   "FROM announced_pu_results apr"
+                   "WHERE apr.polling_unit_uniqueid = ("
+                   "   SELECT pu.uniqueid FROM polling_unit pu " 
+                   "   WHERE pu.polling_unit_id = %s)", (polling_unit_id,));
     results = cursor.fetchall()
     conn.close()
     
@@ -51,11 +55,11 @@ def get_local_government_total():
     # Query the database to calculate the total result for the specified lg
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT apr.party_abbreviation, SUM(apr.party_score) AS total_score
-					FROM announced_pu_results apr
-					JOIN lga l ON apr.polling_unit_uniqueid = l.uniqueid
-					WHERE l.lga_name = %s
-					GROUP BY apr.party_abbreviation", (local_government))
+    cursor.execute("SELECT apr.party_abbreviation, SUM(apr.party_score) AS total_score "
+				   "FROM announced_pu_results apr "
+				   "JOIN lga l ON apr.polling_unit_uniqueid = l.uniqueid "
+				   "WHERE l.lga_name = %s "
+				   "GROUP BY apr.party_abbreviation", (local_government,))
 
 
 if __name__ == '__main__':

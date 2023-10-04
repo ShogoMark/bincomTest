@@ -57,7 +57,7 @@
 
         function getTotalResult() {
             const localGovernment = document.getElementById('local_government').value;
-            fetch(`/api/local_government_total?local_government=${localGovernment}`)
+            fetch(`/api/announced_pu_results?local_government=${localGovernment}`)
                 .then(response => response.json())
                 .then(data => {
                     const totalResultDiv = document.getElementById('total_result');
