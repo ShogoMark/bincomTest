@@ -36,16 +36,25 @@ def get_polling_unit_results():
     # Query the database for election results of the specified polling unit
     conn = get_db()
     cursor = conn.cursor(dictionary=True)  # Return results as dictionaries
-    cursor.execute("SELECT  apr.party_abbreviation, apr.party_score "
-                   "FROM announced_pu_results apr"
-                   "WHERE apr.polling_unit_uniqueid = ("
-                   "   SELECT pu.uniqueid FROM polling_unit pu " 
-                   "   WHERE pu.polling_unit_id = %s)", (polling_unit_id,));
-    results = cursor.fetchall()
-    conn.close()
+    cursor.execute(
+        "SELECT announced_pu_results.party_abbreviation, announced_pu_results.party_score "
+        "FROM announced_pu_results "
+        "JOIN polling_unit ON announced_pu_results.polling_unit_uniqueid = polling_unit.uniqueid "
+        "WHERE polling_unit.polling_unit_id = %s", (polling_unit_id,))
+ 
+
+    results = cursor.fetchall()# Return the results as JSON
+
+    processed_results = []
+    for row in results:
+        party_abbreviation = row['party_abbreviation']
+        party_score = row['party_score']
+        processed_results.append({'party_abbreviation': party_abbreviation, 'party_score': party_score})
     
-    # Return the results as JSON
-    return jsonify({'results': results})
+    return jsonify(processed_results)
+    
+    cursor.close()
+    conn.close()
 
 
 @app.route('/api/announced_pu_results', methods=['GET'])
