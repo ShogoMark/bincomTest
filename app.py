@@ -59,7 +59,7 @@ def get_polling_unit_results():
 
 @app.route('/api/announced_pu_results', methods=['GET'])
 def get_local_government_total():
-    local_government = request.args.get('local_government')
+    local_gov = request.args.get('local_gov')
 
     # Query the database to calculate the total result for the specified lg
     conn = get_db()
@@ -68,7 +68,16 @@ def get_local_government_total():
 				   "FROM announced_pu_results apr "
 				   "JOIN lga l ON apr.polling_unit_uniqueid = l.uniqueid "
 				   "WHERE l.lga_name = %s "
-				   "GROUP BY apr.party_abbreviation", (local_government,))
+				   "GROUP BY apr.party_abbreviation", (local_gov,))
+
+    local = cursor.fetchall()
+
+    total_results = [{"party_abbreviation": row[0], "total_score": row[1]} for row in local]
+    
+    cursor.close()
+    conn.close()
+
+    return jsonify(total_results)
 
 
 if __name__ == '__main__':
